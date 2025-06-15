@@ -1,0 +1,58 @@
+{% extends "core/base.html" %}
+{% block title %}Product List{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Uploaded Products</h2>
+    <form method="get" class="filter-form">
+        <label for="category">Category:</label>
+        <select name="category" id="category" onchange="this.form.submit()">
+            <option value="">All</option>
+            {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if cat.id|stringformat:"s" == request.GET.category %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+        <label for="sub_category">Sub-Category:</label>
+        <select name="sub_category" id="sub_category" onchange="this.form.submit()">
+            <option value="">All</option>
+            {% for sub in subcategories %}
+                <option value="{{ sub.id }}" {% if sub.id|stringformat:"s" == request.GET.sub_category %}selected{% endif %}>{{ sub.name }}</option>
+            {% endfor %}
+        </select>
+        <noscript><button type="submit">Filter</button></noscript>
+    </form>
+    <br>
+    <table border="1" cellpadding="5" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Sub-Category</th>
+                <th>Quantity</th>
+                <th>Sales</th>
+                <th>Order Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.order_id }}</td>
+                <td>{{ product.product_name }}</td>
+                <td>{{ product.category.name }}</td>
+                <td>{{ product.sub_category.name }}</td>
+                <td>{{ product.quantity }}</td>
+                <td>{{ product.sales }}</td>
+                <td>{{ product.order_date }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">No products found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <br>
+    <a href="{% url 'import_products' %}" class="btn btn-primary">Upload More Products</a>
+</div>
+{% endblock %}

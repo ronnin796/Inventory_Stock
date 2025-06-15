@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block title %}Upload Products{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-10 p-6 bg-white shadow rounded">
+    <h2 class="text-2xl font-semibold mb-4">Upload Excel File</h2>
+
+    {% if messages %}
+        <ul class="mb-4">
+            {% for message in messages %}
+                <li class="p-2 rounded {{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data" class="space-y-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Upload</button>
+    </form>
+
+    <a href="{% url 'home' %}" class="btn btn-secondary">Go Back</a>
+</div>
+{% endblock %}

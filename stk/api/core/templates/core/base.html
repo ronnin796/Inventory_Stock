@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}My Site{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'core/styles.css' %}">
+    {% block extra_head %}{% endblock %}
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% block extra_scripts %}{% endblock %}
+</head>
+<body>
+    <header>
+        <h1>{% block header %}Welcome to My Site{% endblock %}</h1>
+    </header>
+    <nav>
+        {% block nav %}{% endblock %}
+    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        {% block footer %}© {{ year|default:"2024" }} My Site{% endblock %}
+    </footer>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
