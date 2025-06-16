@@ -2,17 +2,17 @@ from django.http import HttpResponse
 import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Product, Category, SubCategory
+from .models import MasterProduct, Category, SubCategory, Product_sales
 from .forms import ExcelUploadForm
-# Create your views here.
+
 def index(request):
-    """
-    Render the index page.
-    """
     return HttpResponse("Hello, world! This is the index page of the inventory API.")
 
-
 def import_products(request):
+    """
+    Import product sales data from Excel and auto-create categories, subcategories,
+    and master products if they don't exist.
+    """
     if request.method == 'POST':
         form = ExcelUploadForm(request.POST, request.FILES)
         if form.is_valid():
@@ -23,26 +23,45 @@ def import_products(request):
                 skipped = 0
 
                 for _, row in df.iterrows():
+                    # Get or create category and subcategory
                     category_obj, _ = Category.objects.get_or_create(name=row['Category'].strip().title())
-                    subcat_obj, _ = SubCategory.objects.get_or_create(name=row['Sub-Category'].strip().title(), category=category_obj)
+                    subcat_obj, _ = SubCategory.objects.get_or_create(
+                        name=row['Sub-Category'].strip().title(),
+                        category=category_obj
+                    )
 
-                    if Product.objects.filter(order_id=row['Order ID'], product_name=row['Product Name']).exists():
+                    # Get or create master product
+                    product_name = row['Product Name'].strip()
+                    master_product, _ = MasterProduct.objects.get_or_create(
+                        name=product_name,
+                        defaults={
+                            'category': category_obj,
+                            'sub_category': subcat_obj,
+                            'current_stock': 100,
+                            'reorder_threshold': 10,
+                        }
+                    )
+
+                    # Check for duplicate sale entry (based on order ID and product)
+                    if Product_sales.objects.filter(order_id=row['Order ID'], product=master_product).exists():
                         skipped += 1
                         continue
 
-                    Product.objects.create(
+                    # Save the sale record
+                    Product_sales.objects.create(
                         order_id=row['Order ID'],
-                        product_name=row['Product Name'],
-                        category=category_obj,
-                        sub_category=subcat_obj,
+                        product=master_product,
                         quantity=int(row['Quantity']),
                         sales=float(row['Sales']),
                         order_date=pd.to_datetime(row['Order Date']).date()
                     )
+
+                    # Decrease stock
+                
+
                     imported += 1
 
                 messages.success(request, f'Successfully imported {imported} rows. Skipped {skipped} duplicates.')
-
             except Exception as e:
                 messages.error(request, f'Import failed: {e}')
             return redirect('upload_products')
@@ -51,11 +70,12 @@ def import_products(request):
 
     return render(request, 'inventory/upload.html', {'form': form})
 
+
 def list_products(request):
     """
-    Display all uploaded products with filtering.
+    Display sales data with filtering by category and subcategory.
     """
-    products = Product.objects.select_related('category', 'sub_category').all().order_by('-order_date')
+    sales = Product_sales.objects.select_related('product__category', 'product__sub_category').all().order_by('-order_date')
     categories = Category.objects.all()
     subcategories = SubCategory.objects.all()
 
@@ -63,13 +83,13 @@ def list_products(request):
     subcategory_id = request.GET.get('sub_category')
 
     if category_id:
-        products = products.filter(category_id=category_id)
+        sales = sales.filter(product__category_id=category_id)
         subcategories = subcategories.filter(category_id=category_id)
     if subcategory_id:
-        products = products.filter(sub_category_id=subcategory_id)
+        sales = sales.filter(product__sub_category_id=subcategory_id)
 
     return render(request, 'inventory/items.html', {
-        'products': products,
+        'sales': sales,
         'categories': categories,
         'subcategories': subcategories,
     })
