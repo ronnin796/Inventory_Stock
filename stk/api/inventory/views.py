@@ -64,7 +64,7 @@ def import_products(request):
                 messages.success(request, f'Successfully imported {imported} rows. Skipped {skipped} duplicates.')
             except Exception as e:
                 messages.error(request, f'Import failed: {e}')
-            return redirect('upload_products')
+            return redirect('list_products')
     else:
         form = ExcelUploadForm()
 

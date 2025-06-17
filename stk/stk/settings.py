@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'api',
     'api.inventory',
     'api.core',
+    'api.forecast'
     
 ]
 
