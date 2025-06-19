@@ -37,7 +37,7 @@ def import_products(request):
                         defaults={
                             'category': category_obj,
                             'sub_category': subcat_obj,
-                            'current_stock': 100,
+                            'current_stock': 20,
                             'reorder_threshold': 10,
                         }
                     )

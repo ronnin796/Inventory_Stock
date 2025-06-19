@@ -57,43 +57,46 @@
         </div>
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
-            const ctx = document.getElementById('forecastChart').getContext('2d');
-            const chart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: {{ forecast_labels|safe }},
-                    datasets: [
-                        {
-                            label: 'Forecasted Sales',
-                            data: {{ forecast_data|safe }},
-                            borderColor: '#2563eb',
-                            backgroundColor: 'rgba(37,99,235,0.1)',
-                            tension: 0.3,
-                            fill: true,
-                        },
-                        {% if actual_sales %}
-                        {
-                            label: 'Actual Sales',
-                            data: {{ actual_sales|safe }},
-                            borderColor: '#f59e42',
-                            backgroundColor: 'rgba(245,158,66,0.1)',
-                            tension: 0.3,
-                            fill: false,
-                        }
-                        {% endif %}
-                    ]
+    const forecastLabels = {{ forecast_labels_json|safe }};
+    const actualSales = {{ actual_sales_json|safe }};
+    const forecastData = {{ forecast_data_json|safe }};
+
+    const ctx = document.getElementById('forecastChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: forecastLabels,
+            datasets: [
+                {
+                    label: 'Actual Sales',
+                    data: actualSales,
+                    borderColor: '#f59e42',
+                    backgroundColor: 'rgba(245,158,66,0.1)',
+                    tension: 0.3,
+                    fill: false,
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { display: true }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+                {
+                    label: 'Forecasted Sales',
+                    data: forecastData,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37,99,235,0.1)',
+                    tension: 0.3,
+                    fill: true,
                 }
-            });
-        </script>
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: true }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
     {% elif selected_product and not alert_message %}
         <div class="text-gray-500 text-center">No forecast data available.</div>
     {% endif %}
