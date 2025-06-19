@@ -9,5 +9,6 @@ urlpatterns = [
     path("", index, name="index"),  # Home page for the API
     path("inventory/", include("api.inventory.urls")),
     path("core/", include("api.core.urls")),
+    path("forecast/", include("api.forecast.urls")),
 
 ]
